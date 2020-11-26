@@ -15,11 +15,14 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "electron-log": "^4.3.0",
+    "electron-pdf-window": "^1.0.12",
     "element-ui": "^2.4.5",
     "mysql": "^2.18.1",
     "sqlite3": "^5.0.0",
     "typeorm": "^0.2.29",
     "vue": "^2.6.11",
+    "vue-dragscroll": "^2.1.0",
+    "vue-pdf": "^4.2.0",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"
   },
