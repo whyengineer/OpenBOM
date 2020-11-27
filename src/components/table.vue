@@ -175,7 +175,7 @@ export default {
         db: this.db,
         column: this.table,
         start: 0,
-        end: 30,
+        end: this.eachCnt,
         where: {
           type_: this.type,
         },
