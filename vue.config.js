@@ -48,7 +48,6 @@ module.exports = {
                   'license': 'LICENSE.txt',
                   'artifactName': 'OpenBom.exe',
                   'guid':'c00f7959-9630-4566-b0cb-9c6a154ec9b3',
-                  'include':'uninstall.nsh'
                 },
                 // options placed here will be merged with default configuration and passed to electron-builder
               },
