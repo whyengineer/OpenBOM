@@ -36,7 +36,7 @@ module.exports = {
                   ]
                 },
                 'nsis': {
-                  'oneClick': true,
+                  'oneClick': false,
                   'allowElevation': true,
                   'perMachine': true,
                   'allowToChangeInstallationDirectory': true,
