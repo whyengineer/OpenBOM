@@ -1,16 +1,18 @@
 <template>
   <div class="home">
-    <BuildSearch />
+    <Table />
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import BuildSearch from "@/components/buildSearch.vue";
+import Table from "@/components/bomTable.vue";
 
 export default {
+  name: "bom",
+
   components: {
-    BuildSearch,
+    Table,
   },
 };
 </script>

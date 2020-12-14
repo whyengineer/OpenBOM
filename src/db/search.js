@@ -11,13 +11,16 @@ export default class Search {
     }
     search(table, colume, type, msg,limit=20) {
         let key = table + colume + type
-        let res1 = this.fs[key].search(msg,limit)
         let res2 = []
-        for (let i in res1) {
-            if(this.memory){
-                res2.push(this.map[this.key].get(res1[i]))
-            }else{
-                //TODO
+        if(key in this.fs){
+            let res1 = this.fs[key].search(msg,limit)
+        
+            for (let i in res1) {
+                if(this.memory){
+                    res2.push(this.map[this.key].get(res1[i]))
+                }else{
+                    //TODO
+                }
             }
         }
         return res2

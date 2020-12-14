@@ -3,47 +3,38 @@
     <template>
       <el-backtop target=".table" style="z-index: 1000"></el-backtop>
     </template>
-    <div class="page" v-if="search == ''">
-      <el-pagination
-        layout="prev, pager, next"
-        :total="pageTotalNum * 10"
-        :current-page.sync="pageNum"
-        @current-change="handleCurrentChange"
-        background
-      >
-      </el-pagination>
-    </div>
+
+    <el-pagination
+      class="page"
+      layout="prev, pager, next"
+      :total="pageTotalNum * 10"
+      :current-page.sync="pageNum"
+      @current-change="handleCurrentChange"
+      background
+    >
+    </el-pagination>
     <el-row>
       <el-col :span="8">
-        <el-cascader
-          class="option"
-          v-model="productValue"
-          :options="productList"
-          :props="{ expandTrigger: 'hover' }"
-          @change="productChange"
-        ></el-cascader>
+        <el-select v-model="productValue" @change="productChange" placeholder="请选择" class="option">
+          <el-option label="CAP" value="cap"> </el-option>
+          <el-option label="RES" value="res"> </el-option>
+          <el-option label="DIODE" value="diode"> </el-option>
+          <el-option label="CONNECTOR" value="connector"> </el-option>
+        </el-select>
       </el-col>
-      <el-col :span="5" :offset="1" style="text-align:center">
-        <el-checkbox
+      <el-col :span="2" :offset="14" style="text-align: right">
+        <el-button
           class="option"
-          v-model="smt"
-          label="JLC SMT/人工焊接"
-          border
-          disabled
-        ></el-checkbox>
-      </el-col>
-      <el-col :span="8" :offset="1">
-        <el-input
-          class="option"
-          v-model="search"
-          placeholder="Search"
-          @input="searchChange"
-          clearable
-          ><template slot="prepend"><i class="el-icon-search"></i></template
-        ></el-input>
+          icon="el-icon-plus"
+          @click="addItem()"
+          type="primary"
+          plain
+          >BOM</el-button
+        >
       </el-col>
     </el-row>
     <el-table
+      size="mini"
       border
       :data="tableData"
       style="width: 100%"
@@ -54,62 +45,71 @@
     >
       <el-table-column type="index" width="100">
         <template slot-scope="scope">
-          <span v-if="search == ''">
+          <span>
             <strong>{{ scope.$index + 1 + (pageNum - 1) * eachCnt }}</strong
             >/{{ totalCnt }}
-          </span>
-          <span v-else>
-            {{ scope.$index + 1 }}
           </span>
         </template>
       </el-table-column>
       <el-table-column prop="value" label="Value" width="180">
-        <template slot-scope="scope">
-          <el-link target="_blank" @click="openItem(scope.row)">{{
-            scope.row.value
-          }}</el-link>
-        </template>
       </el-table-column>
       <el-table-column label="Type" width="180">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.type }}</el-tag>
+          <el-tag size="mini">{{ scope.row.type }}</el-tag>
         </template>
+      </el-table-column>
+      <el-table-column
+        prop="footprint_path"
+        label="Footprint Path"
+        width="180"
+        show-overflow-tooltip
+      >
       </el-table-column>
       <el-table-column prop="footprint" label="Footprint" width="180">
       </el-table-column>
-      <el-table-column prop="desc" label="Description"> </el-table-column>
       <el-table-column
-        label="Price"
-        width="100"
-        sortable
-        :sort-method="priceSort"
+        prop="desc"
+        label="Description"
+        show-overflow-tooltip
+        min-width="300"
       >
-        <template slot-scope="scope">
-          <span v-if="scope.row.prices.length > 0">{{
-            scope.row.prices[0].price
-          }}</span>
-          <span v-else>0</span>
-        </template>
       </el-table-column>
-
+      <el-table-column label="Symbol" prop="symbol" show-overflow-tooltip>
+      </el-table-column>
+      <el-table-column
+        label="Library Ref"
+        prop="library_ref"
+        show-overflow-tooltip
+      >
+      </el-table-column>
+      <el-table-column
+        label="Library Path"
+        prop="library_path"
+        show-overflow-tooltip
+      >
+      </el-table-column>
       <el-table-column label="Datasheet" width="100" align="center">
         <template slot-scope="scope">
           <el-button
-            :disabled="scope.row.datasheet==''"
+            :disabled="scope.row.datasheet == ''"
             type="primary"
             @click="openDs(scope.row.datasheet)"
             icon="el-icon-document"
+            size="mini"
             circle
             plain
           ></el-button>
         </template>
       </el-table-column>
-      <el-table-column label="Vendor Link" width="124" align="center">
+      <el-table-column label="Vendor1" show-overflow-tooltip>
         <template slot-scope="scope">
-          <el-link target="_blank" @click="openUrl(scope.row.vendorUrl)"
-            ><strong>{{ scope.row.vendor.toUpperCase() }}</strong
-            >:{{ scope.row.vendorPn }}</el-link
-          >
+          {{ scope.row.vendor1 }} / {{ scope.row.vendor1_pn }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="Vendor2" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.vendor2 }} / {{ scope.row.vendor2_pn }}
         </template>
       </el-table-column>
       <el-table-column
@@ -120,22 +120,34 @@
       >
         <template slot-scope="scope">
           <el-button
-            icon="el-icon-plus"
-            size="small"
-            @click="add2bom(scope.$index, scope.row)"
-            >BOM</el-button
-          >
+            icon="el-icon-delete"
+            type="danger"
+            size="mini"
+            circle
+            plain
+            @click="deleteItem(scope.$index, scope.row)"
+          ></el-button>
+          <el-button
+            icon="el-icon-edit"
+            type="warning"
+            size="mini"
+            circle
+            plain
+            @click="editItem(scope.$index, scope.row)"
+          ></el-button>
         </template>
       </el-table-column>
     </el-table>
     <el-dialog :visible.sync="showPdf" width="70%" v-if="showPdf">
       <pdfViewer :url="pdfUrl"></pdfViewer>
     </el-dialog>
-    <el-dialog :visible.sync="showItem" width="70%" v-if="showItem">
-      <itemViewer :val="item"></itemViewer>
-    </el-dialog>
     <el-dialog :visible.sync="showAddBom" width="70%" v-if="showAddBom">
-      <jlc2Bom :config="bomItem" :table="table" :edit="false" @added="add2bomDone"></jlc2Bom>
+      <jlc2Bom
+        :config="bomItem"
+        :table="productValue"
+        :edit="edit"
+        @added="add2bomDone"
+      ></jlc2Bom>
     </el-dialog>
   </div>
 </template>
@@ -143,14 +155,12 @@
 <script>
 import { ipcRenderer, shell } from "electron";
 import pdfViewer from "./pdfViewer";
-import itemViewer from "./itemViewer";
 import products from "./products.js";
 import jlc2Bom from "./jlc2bom";
 export default {
   name: "Table",
   components: {
     pdfViewer,
-    itemViewer,
     jlc2Bom,
   },
   // props: {
@@ -169,26 +179,23 @@ export default {
   // },
   data() {
     return {
-      smt: false,
+      delCnt: 0,
+      index: 0,
       height: "",
-      db: "jlc",
+      db: "bom",
       table: "cap",
-      type: "贴片电容",
       tableData: [],
-      oldData: [],
       showPdf: false,
-      showItem: false,
       showAddBom: false,
       bomItem: {},
-      item: {},
       pdfUrl: "",
       totalCnt: 0,
       pageNum: 1,
       eachCnt: 30,
       loading: true,
-      productValue: ["cap", "贴片电容"],
+      productValue: "cap",
       productList: products,
-      search: "",
+      edit: false,
     };
   },
   computed: {
@@ -201,65 +208,56 @@ export default {
     this.height = window.innerHeight - 78 + "px";
   },
   mounted() {
-    ipcRenderer.on("getDataRet", (evt, data) => {
+    ipcRenderer.on("deleteBomRet", (evt, data) => {
+      if (data.status) {
+        this.$notify({
+          title: "Success",
+          message: `Delete ${data.value.value} from BOM ok!`,
+          type: "success",
+        });
+        this.$emit("added", data);
+        // this.totalCnt--;
+        this.delCnt++;
+         this.tableData.splice(this.index, 1);
+      } else {
+        this.$notify.error({
+          title: "Error",
+          message: data.err,
+        });
+      }
+    });
+    ipcRenderer.on("getBomDataRet", (evt, data) => {
       this.tableData = data.data;
       this.loading = false;
     });
-    ipcRenderer.on("dbGetCountRet", (evt, data) => {
+    ipcRenderer.on("bomGetCountRet", (evt, data) => {
       this.totalCnt = data.count;
       ipcRenderer.send("getData", {
-        event: "getDataRet",
+        event: "getBomDataRet",
         db: this.db,
         column: this.table,
         start: 0,
         end: this.eachCnt,
-        where: {
-          type_: this.type,
-        },
       });
     });
     this.loading = true;
     ipcRenderer.send("dbGetCount", {
-      event: "dbGetCountRet",
+      event: "bomGetCountRet",
       db: this.db,
       column: this.table,
-      option: `type_="${this.type}"`,
-      type: this.type,
     });
-    ipcRenderer.on("searchRet", (evt, data) => {
-      this.tableData = data;
-      this.loading = false;
-    });
+
     // ipcRenderer.send("getData",{db:'jlc',column:'cap',start:0,end:30});
   },
   destroyed() {
-    ipcRenderer.removeAllListeners("getDataRet");
-    ipcRenderer.removeAllListeners("dbGetCountRet");
-    ipcRenderer.removeAllListeners("searchRet");
+    ipcRenderer.removeAllListeners("getBomDataRet");
+    ipcRenderer.removeAllListeners("bomGetCountRet");
+    ipcRenderer.removeAllListeners("deleteBomRet");
     window.removeEventListener("resize", this.sizeChange);
   },
   methods: {
     add2bomDone() {
       this.showAddBom = false;
-    },
-    priceSort(a, b) {
-      let priceA = a.prices[0].price.replace("/个", "").replace("/片", "");
-      let priceB = b.prices[0].price.replace("/个", "").replace("/片", "");
-      return parseFloat(priceA) - parseFloat(priceB);
-    },
-    searchChange(msg) {
-      if (msg != "") {
-        this.loading = true;
-        ipcRenderer.send("search", {
-          event: "searchRet",
-          db: this.db,
-          column: this.table,
-          type: this.type,
-          msg: msg,
-        });
-      } else {
-        this.handleCurrentChange(this.pageNum);
-      }
     },
     sizeChange() {
       this.height = window.innerHeight - 78 + "px";
@@ -267,21 +265,12 @@ export default {
     productChange(val) {
       this.search = "";
       this.pageNum = 1;
-      this.table = val[0];
-      this.type = val[1];
+      this.table = val;
       this.loading = true;
       ipcRenderer.send("dbGetCount", {
-        event: "dbGetCountRet",
+        event: "bomGetCountRet",
         db: this.db,
         column: this.table,
-        option: `type_="${this.type}"`,
-        type: this.type,
-      });
-    },
-    openItem(val) {
-      this.item = JSON.parse(JSON.stringify(val));
-      this.$nextTick(() => {
-        this.showItem = true;
       });
     },
     openUrl(url) {
@@ -294,8 +283,39 @@ export default {
         this.showPdf = true;
       });
     },
-    add2bom(index, val) {
+    editItem(index, val) {
       this.bomItem = val;
+      this.edit = true;
+      this.$nextTick(() => {
+        this.showAddBom = true;
+      });
+    },
+    deleteItem(index, val) {
+      this.index = index;
+      this.$confirm(
+        `You are deleting <br>PN: <strong>${val.pn}</strong>, <br>Value: <strong>${val.value}</strong>, <br>Continue?`,
+        `Delete ${val.value}`,
+        {
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+          type: "error",
+          center: true,
+          dangerouslyUseHTMLString: true,
+        }
+      )
+        .then(() => {
+          ipcRenderer.send("dbDeleteItem", {
+            db: "bom",
+            column: this.productValue,
+            value: val,
+            event: "deleteBomRet",
+          });
+        })
+        .catch(() => {});
+    },
+    addItem() {
+      this.edit = false;
+      this.bomItem = {};
       this.$nextTick(() => {
         this.showAddBom = true;
       });
@@ -303,11 +323,11 @@ export default {
     handleCurrentChange(val) {
       this.loading = true;
       ipcRenderer.send("getData", {
-        event: "getDataRet",
+        event: "getBomDataRet",
         db: this.db,
         column: this.table,
-        start: (val - 1) * this.eachCnt,
-        end: val * this.eachCnt,
+        start: (val - 1) * this.eachCnt-this.delCnt,
+        end: val * this.eachCnt-this.delCnt,
         where: {
           type_: this.type,
         },

@@ -14,16 +14,20 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
+    width: 1200,
     height: 600,
+    minWidth:1000,
+    title:'OpenBom-WhyEngineer',
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
-    }
+    },
+    // eslint-disable-next-line no-undef
+    icon: `${__static}/openbom.ico`
   })
   const database= new db(win)
-  database.connect(false)
+  database.connect(true)
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)

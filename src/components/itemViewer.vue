@@ -41,7 +41,6 @@ export default {
   },
   created() {
     this.descTable= [];
-    console.log(this.height)
     let descs = this.val.desc.split(",");
     for (let i in descs) {
       let b = descs[i].split(":");

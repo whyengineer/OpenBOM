@@ -2,6 +2,7 @@
   <div class="pdfViewer">
     <div>
       <el-pagination
+        class="page"
         layout="prev, pager, next"
         :total="pageTotalNum * 10"
         :current-page.sync="pageNum"
@@ -128,6 +129,9 @@ export default {
     padding-left: 100px;
     padding-top: 10px;
     padding-bottom: 30px;
+}
+.page{
+  text-align: center;
 }
 .pdfViewer{
     margin: 50px;
