@@ -147,6 +147,7 @@
         :table="productValue"
         :edit="edit"
         @added="add2bomDone"
+        @updated="update2bomDone"
       ></jlc2Bom>
     </el-dialog>
   </div>
@@ -286,6 +287,7 @@ export default {
     editItem(index, val) {
       this.bomItem = val;
       this.edit = true;
+      this.index = index;
       this.$nextTick(() => {
         this.showAddBom = true;
       });
@@ -319,6 +321,10 @@ export default {
       this.$nextTick(() => {
         this.showAddBom = true;
       });
+    },
+    update2bomDone(val){
+      this.showAddBom = false;
+      this.$set(this.tableData,this.index,val.value)
     },
     handleCurrentChange(val) {
       this.loading = true;

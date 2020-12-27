@@ -58,6 +58,14 @@
         ></i>
       </h2>
       <el-alert
+        v-if="!jlcConnect.status"
+        :title="jlcConnect.msg"
+        type="error"
+        show-icon
+        :closable="false"
+        class="tip"
+      ></el-alert>
+      <el-alert
         title="Can't change these parameters right now!"
         type="info"
         show-icon
@@ -106,8 +114,8 @@ export default {
         type: "mysql",
         host: "www.whyengineer.com",
         port: 3306,
-        username: "jlc",
-        password: "71451085a",
+        username: "openbom-jlc",
+        password: "openbom",
         database: "jlc",
       },
       bom: {

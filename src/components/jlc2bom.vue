@@ -272,9 +272,25 @@ export default {
         });
       }
     });
+    ipcRenderer.on("dbUpdateItemBomRet", (evt, data) => {
+      if (data.status) {
+        this.$notify({
+          title: "Success",
+          message: `Update ${data.value.value} to BOM ok!`,
+          type: "success",
+        });
+        this.$emit("updated", data);
+      } else {
+        this.$notify.error({
+          title: "Error",
+          message: data.err,
+        });
+      }
+    });
   },
   destroyed() {
     ipcRenderer.removeAllListeners("dbCreateItemBomRet");
+    ipcRenderer.removeAllListeners("dbUpdateItemBomRet");
   },
 
   props: {
@@ -314,11 +330,11 @@ export default {
     updateForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          ipcRenderer.send("dbCreateItem", {
+          ipcRenderer.send("dbUpdateItem", {
             db: "bom",
-            column: "cap",
+            column: this.table,
             value: this.convertForm(),
-            event: "dbCreateItemBomRet",
+            event: "dbUpdateItemBomRet",
           });
         }
       });

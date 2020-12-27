@@ -52,6 +52,27 @@ export default class Db {
             }
             evt.reply(val.event, parseRet)
         })
+        ipcMain.on('dbUpdateItem', (evt, db) => {
+            if (this.connected[db.db]) {
+                this.repo[db.db][db.column].update({pn:db.value.pn},db.value).then(() => {
+                    let ret = db
+                    ret.status = true
+                    evt.reply(db.event, ret)
+                }).catch(err => {
+                    log.error(err)
+                    let ret = db
+                    ret.status = false
+                    ret.err = err.message
+                    evt.reply(db.event, ret)
+                })
+            } else {
+                let ret = db
+                ret.status = false
+                ret.err = `${db.db} doesn't connect`
+                evt.reply(db.event, ret)
+            }
+
+        })
         ipcMain.on('dbDeleteItem', (evt, db) => {
             if (this.connected[db.db]) {
                 this.repo[db.db][db.column].delete(db.value.id).then(() => {
@@ -222,6 +243,7 @@ export default class Db {
 
 
             }).catch(err => {
+                log.error(err)
                 this.lastErr.bom = err;
                 this.connected.bom = false
             })
@@ -231,15 +253,15 @@ export default class Db {
         }
     }
     connectJlc(sync) {
-        let jlcConParam = store.get('jlcConParam', {
+        let jlcConParam = {
             name: "jlc",
             type: "mysql",
             host: "www.whyengineer.com",
             port: 3306,
-            username: "jlc",
-            password: "71451085a",
+            username: "openbom-jlc",
+            password: "openbom",
             database: "jlc",
-        })
+        }
         jlcConParam.logging = this.log
         jlcConParam.synchronize = sync
         jlcConParam.entities = [Cap, Res, Diode, Connector]
@@ -256,6 +278,7 @@ export default class Db {
 
 
         }).catch(err => {
+            log.error(err)
             this.lastErr.jlc = err
             this.connected.jlc = false;
         })

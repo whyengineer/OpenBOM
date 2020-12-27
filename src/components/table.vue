@@ -222,6 +222,7 @@ export default {
     ipcRenderer.send("dbGetCount", {
       event: "dbGetCountRet",
       db: this.db,
+      buildSearch: true,
       column: this.table,
       option: `type_="${this.type}"`,
       type: this.type,
@@ -272,6 +273,7 @@ export default {
       this.loading = true;
       ipcRenderer.send("dbGetCount", {
         event: "dbGetCountRet",
+        buildSearch: true,
         db: this.db,
         column: this.table,
         option: `type_="${this.type}"`,
